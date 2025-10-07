@@ -1,0 +1,15 @@
+meta:
+  candidate_name: "Jane Doe"
+  notes: "Senior React engineer; resume v1"
+
+qa:
+  - question: "List the candidate’s top 5 skills."
+    answer: "React; Node.js; TypeScript; GraphQL; AWS"
+  - question: "How many years of React experience?"
+    answer: "5"
+  - question: "What is the candidate’s current company?"
+    answer: "Acme Corp"
+  - question: "What city is the candidate based in?"
+    answer: "Bangalore"
+  - question: "Does the candidate have experience with AWS Lambda?"
+    answer: "Yes"
