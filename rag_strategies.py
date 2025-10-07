@@ -25,25 +25,15 @@ def chunk_text(text: str, method: Literal["recursive","token"]="recursive", **kw
 # ---- Prompt variants ----
 PROMPTS = {
     "baseline": (
-        "You are a recruitment assistant. Use ONLY the context to answer.
-
-"
-        "Context:
-{context}
-
-Question: {query}"
+        "You are a recruitment assistant. Use ONLY the context to answer.\n\n"
+        "Context:\n{context}\n\n"
+        "Question: {query}"
     ),
     "strict": (
-        "Act as a precise retrieval QA assistant.
-"
-        "Use only the provided context. If the answer isn't in the context, say: 'I don't know.'
-
-"
-        "Context:
-{context}
-
-Question: {query}
-"
+        "Act as a precise retrieval QA assistant.\n"
+        "Use only the provided context. If the answer isn't in the context, say: 'I don't know.'\n\n"
+        "Context:\n{context}\n\n"
+        "Question: {query}\n"
         "Answer concisely with bullet points where possible."
     ),
 }

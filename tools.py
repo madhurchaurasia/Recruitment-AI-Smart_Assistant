@@ -46,6 +46,7 @@ def ingest_text_tool(text: str, chunking: str = "recursive",
                      embedding_model: str = "text-embedding-3-small",
                      namespace: Optional[str] = None,
                      metadata: Optional[Dict[str, Any]] = None) -> str:
+    """Chunk and upsert resume text into Pinecone, returning a status string."""
     n = _ingest_text(text, chunking=chunking, embedding_model=embedding_model, metadata=metadata, namespace=namespace)
     return f"Ingested {n} chunks into namespace {namespace or '(default)'}."
 
@@ -56,6 +57,7 @@ def generate_tool(query: str,
                   prompt_variant: str = "baseline",
                   k: int = 5,
                   namespace: Optional[str] = None) -> str:
+    """Run retrieval-augmented QA for the given query and return the LLM answer."""
     answer, _ = _generate_answer(query, embedding_model=embedding_model, rerank=rerank,
                                  prompt_variant=prompt_variant, k=k, namespace=namespace)
     return answer
