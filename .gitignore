@@ -1,0 +1,96 @@
+# -------------------------
+# OS junk
+# -------------------------
+.DS_Store
+Thumbs.db
+myenv/
+# -------------------------
+# Python build / bytecode / caches
+# -------------------------
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.so
+*.egg-info/
+.eggs/
+.build/
+dist/
+build/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.ipynb_checkpoints/
+
+# -------------------------
+# Virtual environments
+# -------------------------
+.venv/
+venv/
+env/
+ENV/
+*.virtualenv
+
+# -------------------------
+# Editors / IDEs
+# -------------------------
+.vscode/
+.idea/
+
+# -------------------------
+# Logs & temporary files
+# -------------------------
+*.log
+logs/
+tmp/
+temp/
+*.tmp
+
+# -------------------------
+# Project secrets & local config
+# -------------------------
+.env
+.env.local
+.env.*            # keep .env.example tracked
+!.env.example
+
+# # Streamlit local secrets/config (if you use them)
+# .streamlit/secrets.toml
+# .streamlit/config.toml
+
+# -------------------------
+# App/runtime artifacts
+# -------------------------
+.ns_history.json           # namespace history cache for the UI
+rag_project.zip            # exported zip bundles
+*.sqlite*                  # any local dbs you might create
+*.cache
+.cache/
+
+# -------------------------
+# Data inputs/outputs
+# (keep sample_gold.yaml for reference)
+# -------------------------
+# data/
+# datasets/*.yml
+# datasets/*.yaml
+# !datasets/sample_gold.yaml   # keep the example gold file tracked
+
+# If you keep sample resumes under data/resumes/, ignore them:
+# data/resumes/
+# # (Optionally keep a README.md in data/ with instructions)
+# !data/README.md
+
+# -------------------------
+# Images/renders (optional)
+# -------------------------
+*.png
+*.jpg
+*.jpeg
+*.gif
+*.tiff
+
+# -------------------------
+# Notebooks (if you add later)
+# -------------------------
+*.ipynb_checkpoints
