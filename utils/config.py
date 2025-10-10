@@ -17,7 +17,7 @@ load_dotenv()
 # --- Required ENV ---
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 PINECONE_API_KEY = os.getenv("PINECONE_API_KEY")
-PINECONE_INDEX_NAME = os.getenv("PINECONE_INDEX_NAME", "resume_rag")
+PINECONE_INDEX_NAME = os.getenv("PINECONE_INDEX_NAME", "resume-rag")
 LANGSMITH_API_KEY = os.getenv("LANGSMITH_API_KEY")
 
 if not OPENAI_API_KEY:

@@ -25,7 +25,7 @@ def ingest_text(text: str, *,
     PineconeVectorStore.from_documents(
         documents=docs,
         embedding=emb,
-        index_name=os.getenv("PINECONE_INDEX_NAME", "resume_rag"),
+        index_name=os.getenv("PINECONE_INDEX_NAME", "resume-rag"),
         namespace=namespace,
     )
     return len(docs)

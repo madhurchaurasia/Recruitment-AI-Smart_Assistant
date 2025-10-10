@@ -19,6 +19,9 @@ def generate_answer(query: str, *,
                     namespace: Optional[str] = None) -> Tuple[str, List[Dict[str, Any]]]:
     emb = OpenAIEmbeddings(model=embedding_model)
     docs = retrieve_docs(query, k=k, embedding=emb, rerank=rerank, namespace=namespace)
+    if not docs or all(not (d.get("content") or "").strip() for d in docs):
+        return "I don't know. I could not find relevant information in the retrieved documents.", docs
+
     context = "\n\n".join(d["content"] for d in docs)
     tmpl = PROMPTS[prompt_variant]
     prompt = ChatPromptTemplate.from_template(tmpl)

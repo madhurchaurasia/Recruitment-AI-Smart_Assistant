@@ -13,28 +13,119 @@ python datasets/manual_eval.py   --resume ./data/resumes/jane_doe.pdf   --gold  
 import os, argparse
 from pathlib import Path
 from typing import Dict, Any
+import sys
+
+ROOT_DIR = Path(__file__).resolve().parent.parent
+if str(ROOT_DIR) not in sys.path:
+    sys.path.insert(0, str(ROOT_DIR))
 
 import yaml
+from functools import partial
 from langsmith import Client, traceable
 from langsmith.evaluation import evaluate
+
+try:
+    from langsmith.evaluation.evaluators import (
+        qa_with_reference,
+        faithfulness,
+        answer_relevancy,
+        conciseness,
+    )
+except ImportError:
+    qa_with_reference = None
+    faithfulness = None
+    answer_relevancy = None
+    conciseness = None
 
 from parsers import get_parser
 from ingest import ingest_text
 from generate import generate_answer
+
+
+def _get_dataset_by_name(client: Client, name: str):
+    """
+    Retrieve a dataset object regardless of LangSmith SDK version.
+    """
+    try:
+        return client.get_dataset(name=name)
+    except AttributeError:
+        pass
+
+    try:
+        datasets_iter = client.list_datasets()
+    except TypeError:
+        datasets_iter = client.list_datasets()
+
+    if datasets_iter:
+        for entry in datasets_iter:
+            if getattr(entry, "name", None) == name:
+                entry_id = getattr(entry, "id", None)
+                if entry_id:
+                    try:
+                        return client.read_dataset(entry_id)
+                    except Exception:
+                        return entry
+                return entry
+    return None
+
 
 def load_yaml(path: Path):
     with open(path, "r", encoding="utf-8") as f:
         return yaml.safe_load(f)
 
 def ensure_dataset(client: Client, name: str, qa: list[dict]) -> str:
-    ds = client.get_dataset(name=name)
-    if ds is None:
-        ds = client.create_dataset(name=name, description="Manual resume QA dataset")
+    """
+    Create or reuse a LangSmith dataset in a version-tolerant way.
+    """
+    ds_id = None
+    ds_description = "Manual resume QA dataset"
+
+    # Try modern SDK signature first.
+    try:
+        dataset = client.get_dataset(name=name)
+    except AttributeError:
+        dataset = None
+
+    if dataset is not None:
+        ds_id = getattr(dataset, "id", None)
+
+    # Fallback: enumerate datasets and match by name (older SDKs)
+    if ds_id is None:
+        try:
+            datasets_iter = client.list_datasets()
+        except TypeError:
+            datasets_iter = client.list_datasets()
+
+        if datasets_iter:
+            for entry in datasets_iter:
+                if getattr(entry, "name", None) == name:
+                    ds_id = getattr(entry, "id", None)
+                    break
+
+    # Create dataset if still missing, trying different signatures.
+    if ds_id is None:
+        created = None
+        create_kwargs = {"name": name, "description": ds_description}
+        try:
+            created = client.create_dataset(**create_kwargs)
+        except TypeError:
+            # Some SDKs expect positional args (name, description)
+            try:
+                created = client.create_dataset(name, ds_description)
+            except TypeError:
+                # Last resort: try without description if unsupported
+                created = client.create_dataset(name)
+        ds_id = getattr(created, "id", None)
+        if ds_id is None:
+            raise RuntimeError("Failed to create LangSmith dataset; unknown client response.")
+
     for ex in qa:
-        client.create_example(inputs={"question": ex["question"]},
-                              outputs={"answer": ex.get("answer", "")},
-                              dataset_id=ds.id)
-    return ds.id
+        client.create_example(
+            inputs={"question": ex["question"]},
+            outputs={"answer": ex.get("answer", "")},
+            dataset_id=ds_id,
+        )
+    return ds_id
 
 def ingest_resume(file_path: Path, parser_backend: str, chunking: str, embedding_model: str, namespace: str):
     with open(file_path, "rb") as f:
@@ -66,16 +157,23 @@ def rag_chain_adapter(inputs: Dict[str, Any], config: Dict[str, Any]) -> Dict[st
 
 def run_eval(dataset_name: str, experiment_name: str, config: Dict[str, Any]):
     client = Client()
-    dataset = client.get_dataset(dataset_name)
+    dataset = _get_dataset_by_name(client, dataset_name)
+    if dataset is None:
+        raise RuntimeError(f"LangSmith dataset '{dataset_name}' not found. Ensure dataset creation succeeded.")
+    adapter = partial(rag_chain_adapter, config=config)
+    evaluator_candidates = [
+        qa_with_reference,
+        faithfulness,
+        answer_relevancy,
+        conciseness,
+    ]
+    evaluators = [ev for ev in evaluator_candidates if callable(ev)]
+    if not evaluators:
+        print("⚠️  No built-in LangSmith evaluators available in this SDK version; skipping automatic scoring.")
     results = evaluate(
-        rag_chain_adapter,
+        adapter,
         data=dataset,
-        evaluators=[
-            "qa_with_reference",
-            "faithfulness",
-            "answer_relevancy",
-            "conciseness",
-        ],
+        evaluators=evaluators,
         experiment_prefix=experiment_name,
         metadata=config,
     )

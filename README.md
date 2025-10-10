@@ -24,7 +24,7 @@ A production-grade, **A/B testable** RAG system for resumes with:
   - macOS: `brew install poppler`
   - Ubuntu: `sudo apt-get install poppler-utils`
 
-Create the **Pinecone index** named in `.env` (default: `resume_rag`):
+Create the **Pinecone index** named in `.env` (default: `resume-rag`):
 - Use Pinecone Serverless index with a suitable dimension (OpenAI embeddings will set automatically on first upsert via the new client),
 - Or pre-create in the console.
 

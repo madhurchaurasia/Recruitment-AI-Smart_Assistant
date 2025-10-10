@@ -8,6 +8,7 @@ pinecone-client>=5.0.1
 openai>=1.45.0
 tiktoken
 python-dotenv
+numpy<2
 pdfplumber
 docx2txt
 pytesseract

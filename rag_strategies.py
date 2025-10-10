@@ -25,7 +25,9 @@ def chunk_text(text: str, method: Literal["recursive","token"]="recursive", **kw
 # ---- Prompt variants ----
 PROMPTS = {
     "baseline": (
-        "You are a recruitment assistant. Use ONLY the context to answer.\n\n"
+        "You are a recruitment assistant. Use ONLY the context to answer.\n"
+        "If the answer is not explicitly stated in the context, reply with: \"I don't know.\""
+        "\n\n"
         "Context:\n{context}\n\n"
         "Question: {query}"
     ),
